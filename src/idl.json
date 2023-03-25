@@ -1,0 +1,450 @@
+{
+    "version": "0.1.0",
+    "name": "multisig_wallet",
+    "instructions": [
+      {
+        "name": "createWallet",
+        "accounts": [
+          {
+            "name": "user",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "wallet",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "walletAuth",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false
+          }
+        ],
+        "args": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "m",
+            "type": "u8"
+          },
+          {
+            "name": "n",
+            "type": "u8"
+          },
+          {
+            "name": "owners",
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "proposalLifetime",
+            "type": "i64"
+          }
+        ]
+      },
+      {
+        "name": "giveUpOwnership",
+        "accounts": [
+          {
+            "name": "user",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "wallet",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "walletAuth",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "walletAuthority",
+            "isMut": false,
+            "isSigner": false,
+            "isOptional": true
+          },
+          {
+            "name": "tokenProgram",
+            "isMut": false,
+            "isSigner": false,
+            "isOptional": true
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "createTokenAccount",
+        "accounts": [
+          {
+            "name": "payer",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "wallet",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "walletAuthority",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "mint",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "account",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "tokenProgram",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "associatedTokenProgram",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "createProposal",
+        "accounts": [
+          {
+            "name": "user",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "wallet",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "walletAuth",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "proposal",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "voteCount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "receiveAccount",
+            "isMut": false,
+            "isSigner": false,
+            "isOptional": true
+          }
+        ],
+        "args": [
+          {
+            "name": "proposal",
+            "type": {
+              "defined": "ProposalType"
+            }
+          }
+        ]
+      },
+      {
+        "name": "vote",
+        "accounts": [
+          {
+            "name": "user",
+            "isMut": false,
+            "isSigner": true
+          },
+          {
+            "name": "wallet",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "walletAuth",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "proposal",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "voteCount",
+            "isMut": true,
+            "isSigner": false
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "revokeVote",
+        "accounts": [
+          {
+            "name": "user",
+            "isMut": false,
+            "isSigner": true
+          },
+          {
+            "name": "wallet",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "walletAuth",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "proposal",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "voteCount",
+            "isMut": true,
+            "isSigner": false
+          }
+        ],
+        "args": []
+      },
+      {
+        "name": "closeProposal",
+        "accounts": [
+          {
+            "name": "wallet",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "proposal",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "voteCount",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "proposer",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "payer",
+            "isMut": true,
+            "isSigner": true,
+            "isOptional": true
+          },
+          {
+            "name": "walletAuth",
+            "isMut": true,
+            "isSigner": false,
+            "isOptional": true
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false,
+            "isOptional": true
+          },
+          {
+            "name": "sendAccount",
+            "isMut": true,
+            "isSigner": false,
+            "isOptional": true
+          },
+          {
+            "name": "receiveAccount",
+            "isMut": true,
+            "isSigner": false,
+            "isOptional": true
+          },
+          {
+            "name": "walletAuthority",
+            "isMut": false,
+            "isSigner": false,
+            "isOptional": true
+          },
+          {
+            "name": "tokenProgram",
+            "isMut": false,
+            "isSigner": false,
+            "isOptional": true
+          }
+        ],
+        "args": []
+      }
+    ],
+    "types": [
+      {
+        "name": "AccountType",
+        "type": {
+          "kind": "enum",
+          "variants": [
+            {
+              "name": "WalletConfig"
+            },
+            {
+              "name": "WalletAuth"
+            },
+            {
+              "name": "Proposal"
+            },
+            {
+              "name": "VoteCount"
+            }
+          ]
+        }
+      },
+      {
+        "name": "ProposalType",
+        "type": {
+          "kind": "enum",
+          "variants": [
+            {
+              "name": "Transfer",
+              "fields": [
+                {
+                  "name": "token_mint",
+                  "type": "publicKey"
+                },
+                {
+                  "name": "receive_account",
+                  "type": "publicKey"
+                },
+                {
+                  "name": "amount",
+                  "type": "u64"
+                }
+              ]
+            },
+            {
+              "name": "AddOwner",
+              "fields": [
+                {
+                  "name": "user",
+                  "type": "publicKey"
+                }
+              ]
+            },
+            {
+              "name": "ChangeProposalLifetime",
+              "fields": [
+                {
+                  "name": "duration",
+                  "type": "i64"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "errors": [
+      {
+        "code": 6000,
+        "name": "InvalidName",
+        "msg": "Wallet name can not be empty and must be less than max limit in length"
+      },
+      {
+        "code": 6001,
+        "name": "ZeroParameters",
+        "msg": "Wallet parameters m and n can not be zero"
+      },
+      {
+        "code": 6002,
+        "name": "InvalidParameters",
+        "msg": "Wallet parameter m should be less than or equal to n"
+      },
+      {
+        "code": 6003,
+        "name": "InvalidWalletAuth",
+        "msg": "One or more wallet auth accounts passed are invalid"
+      },
+      {
+        "code": 6004,
+        "name": "InsufficientAccounts",
+        "msg": "Insufficient token accounts passed to retrieve funds"
+      },
+      {
+        "code": 6005,
+        "name": "ZeroSendAmount",
+        "msg": "Send amount specified is zero for transfer proposal"
+      },
+      {
+        "code": 6006,
+        "name": "MintMismatch",
+        "msg": "Mint of the receive account does not match with the one specified"
+      },
+      {
+        "code": 6007,
+        "name": "TokenAccountMismatch",
+        "msg": "The passed token account address and the one specified do not match"
+      },
+      {
+        "code": 6008,
+        "name": "TooShortDuration",
+        "msg": "The duration of proposal can not be less than 10 minutes"
+      },
+      {
+        "code": 6009,
+        "name": "AlreadyVoted",
+        "msg": "The user has already voted the proposal"
+      },
+      {
+        "code": 6010,
+        "name": "NotVoted",
+        "msg": "Can not revoke vote, the user has not voted"
+      },
+      {
+        "code": 6011,
+        "name": "NotEnoughVotes",
+        "msg": "Not enough votes to execute the proposal"
+      },
+      {
+        "code": 6012,
+        "name": "MaxOwners",
+        "msg": "Wallet already has max (255) number of owners"
+      },
+      {
+        "code": 6013,
+        "name": "SizeMismatch",
+        "msg": "The number of owner addresses passed and the number of wallet auths passed is different"
+      }
+    ]
+  }
