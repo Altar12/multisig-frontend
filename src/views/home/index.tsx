@@ -6,6 +6,7 @@ import { Wallet } from '../../components/Wallet'
 // Wallet
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 
+import { WalletDetails } from 'components/WalletDetails';
 import { PublicKey } from '@solana/web3.js';
 import { AnchorProvider, BN, Idl, Program } from '@project-serum/anchor'
 import idl from '../../idl.json'
@@ -32,12 +33,22 @@ type WalletConfig = {
   ownerIdentites: [BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN,BN],
   proposalLifetime: BN,
 }
+type WalletDetails = {
+  name: string,
+  memberCount: number,
+  m: number,
+  n: number,
+  proposalLifetime: number, // raw i.e. in seconds
+  members: string[],
+  address: PublicKey,
+}
 
 
 export const HomeView: FC = ({ }) => {
   const wallet = useWallet();
   const { connection } = useConnection();
   const [userWallets, setUserWallets] = useState([])
+  const [selectedWallet, setSelectedWallet] = useState(null)
 
   async function fetchUserWallets() {
     if (wallet.publicKey) {
@@ -91,6 +102,41 @@ export const HomeView: FC = ({ }) => {
   function createMultisig() {
 
   }
+  async function setWallet(index: number) {
+    const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions())
+    const program = new Program(idl as Idl, programId, provider)
+    const walletConfig = await program.account.walletConfig.fetch(userWallets[index].address) as WalletConfig
+    const walletAuths = await connection.getProgramAccounts(programId, {
+      dataSlice: {
+        offset: 1,
+        length: 32
+      },
+      filters: [
+        { 
+          memcmp: {
+            offset: 33,
+            bytes: userWallets[index].address.toBase58()
+          }
+        },
+        {
+          memcmp: {
+            offset: 0,
+            bytes: "2"
+          }
+        }
+      ]
+    })
+    const selectedWallet: WalletDetails = {
+      name: walletConfig.name,
+      memberCount: Number(walletConfig.owners),
+      m: Number(walletConfig.m),
+      n: Number(walletConfig.n),
+      proposalLifetime: Number(walletConfig.proposalLifetime),
+      members: walletAuths.map((walletAuth) => new PublicKey(walletAuth.account.data).toBase58()),
+      address: userWallets[index].address
+    }
+    setSelectedWallet(selectedWallet)
+  }
 
   return (
 
@@ -106,12 +152,16 @@ export const HomeView: FC = ({ }) => {
           <p>Please Connect Your Wallet</p>
         }
         {
+          selectedWallet &&
+          <WalletDetails name={selectedWallet.name} m={selectedWallet.m} n={selectedWallet.n} memberCount={selectedWallet.memberCount} proposalLifetime={selectedWallet.proposalLifetime} members={selectedWallet.members} address={selectedWallet.address}></WalletDetails>
+        }
+        {
           wallet.publicKey && !userWallets &&
           <p>You do not own any multisig</p>
         }
         { userWallets &&
           userWallets.map((userWallet, index) => {
-            return <Wallet key={index} name={userWallet.name} memberCount={userWallet.memberCount} m={userWallet.m} n={userWallet.n} />
+            return <span key={index} onClick={() => setWallet(index)}><Wallet  name={userWallet.name} memberCount={userWallet.memberCount} m={userWallet.m} n={userWallet.n} /></span>
           })
         }
       </div>
