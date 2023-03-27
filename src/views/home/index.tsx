@@ -6,6 +6,7 @@ import { Wallet } from '../../components/Wallet'
 // Wallet
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 
+import { CreateWallet } from 'components/CreateWallet'
 import { WalletDetails } from 'components/WalletDetails';
 import { PublicKey } from '@solana/web3.js';
 import { AnchorProvider, BN, Idl, Program } from '@project-serum/anchor'
@@ -49,6 +50,7 @@ export const HomeView: FC = ({ }) => {
   const { connection } = useConnection();
   const [userWallets, setUserWallets] = useState([])
   const [selectedWallet, setSelectedWallet] = useState(null)
+  const [createWallet, setCreateWallet] = useState(false)
 
   async function fetchUserWallets() {
     if (wallet.publicKey) {
@@ -99,8 +101,11 @@ export const HomeView: FC = ({ }) => {
     fetchUserWallets()
   }, [wallet.publicKey, connection])
 
+  function turnOffCreationMode() {
+    setCreateWallet(false)
+  }
   function createMultisig() {
-
+    setCreateWallet(true)
   }
   async function setWallet(index: number) {
     const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions())
@@ -142,32 +147,37 @@ export const HomeView: FC = ({ }) => {
 
     <div className="md:hero mx-auto p-4">
       <div className="md:hero-content flex flex-col">
-        <div className='mt-6'>
+        {
+          !createWallet &&
+          <div className='mt-6'>
         <h1 className="text-center text-5xl md:pl-12 font-bold text-transparent bg-clip-text bg-gradient-to-br from-indigo-500 to-fuchsia-500 mb-4">
           My Wallets
         </h1>
         </div>
+        }
         {
-          !wallet.publicKey &&
+          !wallet.publicKey && 
           <p>Please Connect Your Wallet</p>
         }
         {
-          selectedWallet &&
+          selectedWallet && !createWallet &&
           <WalletDetails name={selectedWallet.name} m={selectedWallet.m} n={selectedWallet.n} memberCount={selectedWallet.memberCount} proposalLifetime={selectedWallet.proposalLifetime} members={selectedWallet.members} address={selectedWallet.address}></WalletDetails>
         }
         {
-          wallet.publicKey && !userWallets &&
+          wallet.publicKey && !userWallets && !createWallet &&
           <p>You do not own any multisig</p>
         }
-        { userWallets &&
+        { userWallets && !createWallet &&
           userWallets.map((userWallet, index) => {
             return <span key={index} onClick={() => setWallet(index)}><Wallet  name={userWallet.name} memberCount={userWallet.memberCount} m={userWallet.m} n={userWallet.n} /></span>
           })
         }
       </div>
-      <button
+      {
+        !createWallet &&
+        <button
                     className="group w-60 m-2 btn animate-pulse bg-gradient-to-br from-indigo-500 to-fuchsia-500 hover:from-white hover:to-purple-300 text-black"
-                    onClick={createMultisig} disabled={!wallet.publicKey}
+                    onClick={createMultisig} disabled={!wallet.publicKey} style={{marginTop: 300}}
                 >
                     <div className="hidden group-disabled:block">
                         Wallet not connected
@@ -175,7 +185,13 @@ export const HomeView: FC = ({ }) => {
                     <span className="block group-disabled:hidden" > 
                         Create New Multisig
                     </span>
-      </button>
+        </button>
+      }
+      {
+        createWallet &&
+        <CreateWallet switchMode={turnOffCreationMode} />
+      }
+      
     </div>
   );
 };
