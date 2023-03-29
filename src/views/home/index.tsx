@@ -2,16 +2,18 @@
 import { FC, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Wallet } from '../../components/Wallet'
+import bs58 from 'bs58'
+import { sha256 } from 'js-sha256';
 
 // Wallet
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 
 import { CreateWallet } from 'components/CreateWallet'
 import { WalletDetails } from 'components/WalletDetails';
-import { PublicKey } from '@solana/web3.js';
+import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 import { AnchorProvider, BN, Idl, Program } from '@project-serum/anchor'
 import idl from '../../idl.json'
-const programId = new PublicKey('5wgwCaNBvEBz2LCxdL5nTZSab8wwDDpHfX8RaoW1jRpu');
+const programId = new PublicKey('HayWTxKiQxSMeUTPYtxPMmNbjTDfE4kvDP7hypkyLyAC');
 type WalletInfo = {
   address: PublicKey,
   name: string,
@@ -19,14 +21,7 @@ type WalletInfo = {
   n: number,
   memberCount: number,
 };
-type AccountType = {
-  walletConfig?: {},
-  walletAuth?: {},
-  proposal?: {},
-  voteCount?: {},
-}
 type WalletConfig = {
-  discriminator: AccountType,
   name: string,
   m: BN,
   n: BN,
@@ -56,21 +51,22 @@ export const HomeView: FC = ({ }) => {
     if (wallet.publicKey) {
       console.log(wallet.publicKey.toBase58())
       // fetch wallet auths belonging to user
+      const discriminator = Buffer.from(sha256.digest("account:WalletAuth")).subarray(0, 8)
       const walletAuths = await connection.getProgramAccounts(programId, {
         dataSlice: {
-          offset: 33,
+          offset: 40,
           length: 32,
         },
         filters: [
           {
             memcmp: {
               offset: 0,
-              bytes: "2",
+              bytes: bs58.encode(discriminator),
             }  
           },
           {
             memcmp: {
-              offset: 1,
+              offset: 8,
               bytes: wallet.publicKey.toBase58(),
             }
           }
@@ -111,24 +107,19 @@ export const HomeView: FC = ({ }) => {
     const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions())
     const program = new Program(idl as Idl, programId, provider)
     const walletConfig = await program.account.walletConfig.fetch(userWallets[index].address) as WalletConfig
+    const discriminator = Buffer.from(sha256.digest("account:WalletAuth")).subarray(0, 8)
     const walletAuths = await connection.getProgramAccounts(programId, {
       dataSlice: {
-        offset: 1,
+        offset: 8,
         length: 32
       },
       filters: [
         { 
           memcmp: {
-            offset: 33,
+            offset: 40,
             bytes: userWallets[index].address.toBase58()
           }
         },
-        {
-          memcmp: {
-            offset: 0,
-            bytes: "2"
-          }
-        }
       ]
     })
     const selectedWallet: WalletDetails = {
@@ -148,8 +139,19 @@ export const HomeView: FC = ({ }) => {
     <div className="md:hero mx-auto p-4">
       <div className="md:hero-content flex flex-col">
         {
-          !createWallet &&
+          !createWallet && !selectedWallet &&
           <div className='mt-6'>
+            <button
+                    className="m-2 btn animate-pulse bg-gradient-to-br from-indigo-500 to-fuchsia-500 hover:from-white hover:to-purple-300 text-black"
+                    onClick={createMultisig} disabled={!wallet.publicKey} 
+                >
+                    <div className="hidden group-disabled:block">
+                        Wallet not connected
+                    </div>
+                    <span className="block group-disabled:hidden" > 
+                        Create New Multisig
+                    </span>
+        </button>
         <h1 className="text-center text-5xl md:pl-12 font-bold text-transparent bg-clip-text bg-gradient-to-br from-indigo-500 to-fuchsia-500 mb-4">
           My Wallets
         </h1>
@@ -161,32 +163,18 @@ export const HomeView: FC = ({ }) => {
         }
         {
           selectedWallet && !createWallet &&
-          <WalletDetails name={selectedWallet.name} m={selectedWallet.m} n={selectedWallet.n} memberCount={selectedWallet.memberCount} proposalLifetime={selectedWallet.proposalLifetime} members={selectedWallet.members} address={selectedWallet.address}></WalletDetails>
+          <WalletDetails name={selectedWallet.name} m={selectedWallet.m} n={selectedWallet.n} memberCount={selectedWallet.memberCount} proposalLifetime={selectedWallet.proposalLifetime} members={selectedWallet.members} address={selectedWallet.address} />
         }
         {
           wallet.publicKey && !userWallets && !createWallet &&
           <p>You do not own any multisig</p>
         }
-        { userWallets && !createWallet &&
+        { userWallets && !createWallet && !selectedWallet &&
           userWallets.map((userWallet, index) => {
             return <span key={index} onClick={() => setWallet(index)}><Wallet  name={userWallet.name} memberCount={userWallet.memberCount} m={userWallet.m} n={userWallet.n} /></span>
           })
         }
       </div>
-      {
-        !createWallet &&
-        <button
-                    className="group w-60 m-2 btn animate-pulse bg-gradient-to-br from-indigo-500 to-fuchsia-500 hover:from-white hover:to-purple-300 text-black"
-                    onClick={createMultisig} disabled={!wallet.publicKey} style={{marginTop: 300}}
-                >
-                    <div className="hidden group-disabled:block">
-                        Wallet not connected
-                    </div>
-                    <span className="block group-disabled:hidden" > 
-                        Create New Multisig
-                    </span>
-        </button>
-      }
       {
         createWallet &&
         <CreateWallet switchMode={turnOffCreationMode} />

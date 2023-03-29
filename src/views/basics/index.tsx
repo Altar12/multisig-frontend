@@ -1,13 +1,15 @@
 
 import { FC, useEffect, useState } from "react";
 import { Wallet } from '../../components/Wallet'
+import bs58 from 'bs58'
+import { sha256 } from 'js-sha256';
 
 import { WalletDetails } from "components/WalletDetails";
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { AnchorProvider, BN, Idl, Program } from '@project-serum/anchor'
 import idl from '../../idl.json'
-const programId = new PublicKey('5wgwCaNBvEBz2LCxdL5nTZSab8wwDDpHfX8RaoW1jRpu');
+const programId = new PublicKey('HayWTxKiQxSMeUTPYtxPMmNbjTDfE4kvDP7hypkyLyAC');
 type WalletInfo = {
   address: PublicKey,
   name: string,
@@ -15,14 +17,7 @@ type WalletInfo = {
   n: number,
   memberCount: number,
 };
-type AccountType = {
-  walletConfig?: {},
-  walletAuth?: {},
-  proposal?: {},
-  voteCount?: {},
-}
 type WalletConfig = {
-  discriminator: AccountType,
   name: string,
   m: BN,
   n: BN,
@@ -50,6 +45,7 @@ export const BasicsView: FC = ({ }) => {
     if (wallet.publicKey) {
       console.log(wallet.publicKey.toBase58())
       // fetch all wallet config addresses
+      const discriminator = Buffer.from(sha256.digest("account:WalletConfig")).subarray(0, 8)
       const walletConfigs = await connection.getProgramAccounts(programId, {
         dataSlice: {
           offset: 0,
@@ -59,7 +55,7 @@ export const BasicsView: FC = ({ }) => {
           {
             memcmp: {
               offset: 0,
-              bytes: "1",
+              bytes: bs58.encode(discriminator),
             }
           }
         ]

@@ -4,7 +4,7 @@ import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import bs58 from 'bs58';
 import { FC, useCallback, useState, Fragment } from 'react';
 import { notify } from "../utils/notifications";
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { AccountMeta, Keypair, PublicKey } from '@solana/web3.js';
 import { Program, AnchorProvider, Idl, BN } from '@project-serum/anchor'
 import idl from '../idl.json'
 
@@ -12,7 +12,7 @@ interface Props {
     switchMode: () => void,
 }
 
-const programId = new PublicKey('5wgwCaNBvEBz2LCxdL5nTZSab8wwDDpHfX8RaoW1jRpu')
+const programId = new PublicKey('HayWTxKiQxSMeUTPYtxPMmNbjTDfE4kvDP7hypkyLyAC')
 
 export const CreateWallet: FC<Props> = ({switchMode}) => {
     const wallet = useWallet();
@@ -69,16 +69,27 @@ export const CreateWallet: FC<Props> = ({switchMode}) => {
             const program = new Program(idl as Idl, programId, provider)
             const multisigWallet = Keypair.generate()
             const [walletAuth] = PublicKey.findProgramAddressSync([Buffer.from("owner"), multisigWallet.publicKey.toBuffer(), wallet.publicKey.toBuffer()], programId)
-            const txn = await program.methods.createWallet(name, owners.map(owner => new PublicKey(owner)), new BN(m), new BN(n), new BN(proposalLifetime*60))
+            const ownerKeys = owners.map(owner => new PublicKey(owner))
+            const remainingAccounts: AccountMeta[] = ownerKeys.map((owner) => {
+                const [address] = PublicKey.findProgramAddressSync([Buffer.from("owner"), multisigWallet.publicKey.toBuffer(), owner.toBuffer()], programId)
+                return {
+                    pubkey: address,
+                    isSigner: false,
+                    isWritable: true,
+                }
+            })
+                await program.methods.createWallet(name, new BN(m), new BN(n), ownerKeys, new BN(proposalLifetime*60))
                                              .accounts({
                                                 user: wallet.publicKey,
                                                 wallet: multisigWallet.publicKey,
                                                 walletAuth,
                                              })
+                                             .remainingAccounts(remainingAccounts)
                                              .signers([multisigWallet])
                                              .rpc()
         } catch (error) {
             notify({ type: 'error', message: `Creation failed!`, description: error?.message });
+            console.error(error)
             return
         }
         switchMode()
@@ -118,9 +129,7 @@ export const CreateWallet: FC<Props> = ({switchMode}) => {
           return false
         return true
       }
-      async function createWallet() {
 
-      }
     return (
         <div className="relative group">
           <div className="max-w-md mx-auto bg-primary border-2 border-[#5252529f] p-6 px-10 my-2">
