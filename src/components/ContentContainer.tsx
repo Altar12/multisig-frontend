@@ -30,7 +30,7 @@ export const ContentContainer: React.FC<Props> = ({ children }) => {
           </li>
           <li>
           <NavElement
-            label="Basics"
+            label="Explore"
             href="/basics"
           />
           </li>

@@ -12,7 +12,7 @@ interface Props {
     switchMode: () => void,
 }
 
-const programId = new PublicKey('HayWTxKiQxSMeUTPYtxPMmNbjTDfE4kvDP7hypkyLyAC')
+const programId = new PublicKey('39FJGfw5aXNhpNN3bJAVQeDpm6AsNRupUD8L7NBPvABp')
 
 export const CreateWallet: FC<Props> = ({switchMode}) => {
     const wallet = useWallet();
@@ -92,6 +92,13 @@ export const CreateWallet: FC<Props> = ({switchMode}) => {
             console.error(error)
             return
         }
+        setConfig({
+            name: '',
+            owner: '',
+            m: 1,
+            n: 1,
+            proposalLifetime: 10,
+        })
         switchMode()
     }
     function addOwner(event) {

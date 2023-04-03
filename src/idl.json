@@ -242,7 +242,53 @@
       "args": []
     },
     {
-      "name": "closeProposal",
+      "name": "transfer",
+      "accounts": [
+        {
+          "name": "wallet",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "voteCount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sendAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "receiveAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "walletAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "addOwner",
       "accounts": [
         {
           "name": "wallet",
@@ -267,44 +313,43 @@
         {
           "name": "payer",
           "isMut": true,
-          "isSigner": true,
-          "isOptional": true
+          "isSigner": true
         },
         {
           "name": "walletAuth",
           "isMut": true,
-          "isSigner": false,
-          "isOptional": true
+          "isSigner": false
         },
         {
           "name": "systemProgram",
           "isMut": false,
-          "isSigner": false,
-          "isOptional": true
-        },
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "changeLifetime",
+      "accounts": [
         {
-          "name": "sendAccount",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true
-        },
-        {
-          "name": "receiveAccount",
-          "isMut": true,
-          "isSigner": false,
-          "isOptional": true
-        },
-        {
-          "name": "walletAuthority",
+          "name": "wallet",
           "isMut": false,
-          "isSigner": false,
-          "isOptional": true
+          "isSigner": false
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false,
-          "isOptional": true
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "voteCount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proposer",
+          "isMut": true,
+          "isSigner": false
         }
       ],
       "args": []
@@ -535,9 +580,19 @@
       "code": 6013,
       "name": "SizeMismatch",
       "msg": "The number of owner addresses passed and the number of wallet auths passed is different"
+    },
+    {
+      "code": 6014,
+      "name": "IncorrectTokenAccount",
+      "msg": "Token account passed is incorrect"
+    },
+    {
+      "code": 6015,
+      "name": "ProposalInstructionMismatch",
+      "msg": "The instruction called and proposal passed do not match"
     }
   ],
   "metadata": {
-    "address": "HayWTxKiQxSMeUTPYtxPMmNbjTDfE4kvDP7hypkyLyAC"
+    "address": "39FJGfw5aXNhpNN3bJAVQeDpm6AsNRupUD8L7NBPvABp"
   }
 }

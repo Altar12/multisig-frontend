@@ -13,7 +13,7 @@ import { WalletDetails } from 'components/WalletDetails';
 import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 import { AnchorProvider, BN, Idl, Program } from '@project-serum/anchor'
 import idl from '../../idl.json'
-const programId = new PublicKey('HayWTxKiQxSMeUTPYtxPMmNbjTDfE4kvDP7hypkyLyAC');
+const programId = new PublicKey('39FJGfw5aXNhpNN3bJAVQeDpm6AsNRupUD8L7NBPvABp');
 type WalletInfo = {
   address: PublicKey,
   name: string,
@@ -95,7 +95,7 @@ export const HomeView: FC = ({ }) => {
   }
   useEffect(() => {
     fetchUserWallets()
-  }, [wallet.publicKey, connection])
+  }, [wallet.publicKey, connection, createWallet])
 
   function turnOffCreationMode() {
     setCreateWallet(false)
@@ -166,13 +166,18 @@ export const HomeView: FC = ({ }) => {
           <WalletDetails name={selectedWallet.name} m={selectedWallet.m} n={selectedWallet.n} memberCount={selectedWallet.memberCount} proposalLifetime={selectedWallet.proposalLifetime} members={selectedWallet.members} address={selectedWallet.address} />
         }
         {
-          wallet.publicKey && !userWallets && !createWallet &&
-          <p>You do not own any multisig</p>
+          wallet.publicKey && userWallets.length===0 && !createWallet &&
+          <p>You do not own any multisig!!</p>
         }
         { userWallets && !createWallet && !selectedWallet &&
-          userWallets.map((userWallet, index) => {
-            return <span key={index} onClick={() => setWallet(index)}><Wallet  name={userWallet.name} memberCount={userWallet.memberCount} m={userWallet.m} n={userWallet.n} /></span>
-          })
+          <div className="grid grid-cols-4 gap-4">
+            {
+              userWallets.map((userWallet, index) => {
+                return <span key={index} onClick={() => setWallet(index)} style={{cursor: "pointer"}} className="text-center"><Wallet  name={userWallet.name} memberCount={userWallet.memberCount} m={userWallet.m} n={userWallet.n} /></span>
+              })
+            }
+          
+          </div>
         }
       </div>
       {

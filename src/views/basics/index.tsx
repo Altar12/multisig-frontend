@@ -9,7 +9,7 @@ import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { AnchorProvider, BN, Idl, Program } from '@project-serum/anchor'
 import idl from '../../idl.json'
-const programId = new PublicKey('HayWTxKiQxSMeUTPYtxPMmNbjTDfE4kvDP7hypkyLyAC');
+const programId = new PublicKey('39FJGfw5aXNhpNN3bJAVQeDpm6AsNRupUD8L7NBPvABp');
 type WalletInfo = {
   address: PublicKey,
   name: string,
@@ -135,13 +135,18 @@ export const BasicsView: FC = ({ }) => {
           <WalletDetails name={selectedWallet.name} m={selectedWallet.m} n={selectedWallet.n} memberCount={selectedWallet.memberCount} proposalLifetime={selectedWallet.proposalLifetime} members={selectedWallet.members} address={selectedWallet.address}></WalletDetails>
         }
         {
-          wallet.publicKey && !wallets &&
+          wallet.publicKey && wallets.length===0 &&
           <p>No Multisigs have been created!!</p>
         }
         { wallets &&
-          wallets.map((userWallet, index) => {
-            return <span key={index} onClick={()=>{ setWallet(index)}}><Wallet  name={userWallet.name} memberCount={userWallet.memberCount} m={userWallet.m} n={userWallet.n} /></span>
-          })
+          <div className="grid grid-cols-4 gap-4">
+            {
+              wallets.map((userWallet, index) => {
+                return <span key={index} onClick={()=>{ setWallet(index)}} style={{cursor: "pointer"}}><Wallet  name={userWallet.name} memberCount={userWallet.memberCount} m={userWallet.m} n={userWallet.n} /></span>
+              })
+            }
+          
+          </div>
         }
         </div>
       </div>
