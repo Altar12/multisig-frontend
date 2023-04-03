@@ -87,6 +87,7 @@ export const BasicsView: FC = ({ }) => {
     const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions())
     const program = new Program(idl as Idl, programId, provider)
     const walletConfig = await program.account.walletConfig.fetch(wallets[index].address) as WalletConfig
+    const discriminator = Buffer.from(sha256.digest("account:WalletAuth")).subarray(0, 8)
     const walletAuths = await connection.getProgramAccounts(programId, {
       dataSlice: {
         offset: 1,
@@ -95,14 +96,14 @@ export const BasicsView: FC = ({ }) => {
       filters: [
         { 
           memcmp: {
-            offset: 33,
+            offset: 40,
             bytes: wallets[index].address.toBase58()
           }
         },
         {
           memcmp: {
             offset: 0,
-            bytes: "2"
+            bytes: bs58.encode(discriminator)
           }
         }
       ]
@@ -138,7 +139,7 @@ export const BasicsView: FC = ({ }) => {
           wallet.publicKey && wallets.length===0 &&
           <p>No Multisigs have been created!!</p>
         }
-        { wallets &&
+        { wallets && !selectedWallet &&
           <div className="grid grid-cols-4 gap-4">
             {
               wallets.map((userWallet, index) => {

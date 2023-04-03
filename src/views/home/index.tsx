@@ -120,6 +120,12 @@ export const HomeView: FC = ({ }) => {
             bytes: userWallets[index].address.toBase58()
           }
         },
+        {
+          memcmp: {
+            offset: 0,
+            bytes: bs58.encode(discriminator)
+          }
+        }
       ]
     })
     const selectedWallet: WalletDetails = {
